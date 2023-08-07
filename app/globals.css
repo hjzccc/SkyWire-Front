@@ -25,3 +25,10 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  @apply bg-cyan-800
+
+}
