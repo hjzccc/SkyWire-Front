@@ -2,6 +2,7 @@ import {
   BasicResultVo,
   ChannelAccount,
   MessageTemplate,
+  TraceRecord,
 } from "@/types/backendInterface";
 import { features } from "process";
 import useSWR from "swr";
@@ -11,7 +12,8 @@ export const fetcher = (url: string, options: RequestInit) =>
 export const useAppSWR = <T>(
   url: string,
   token?: string,
-  options?: RequestInit
+  options?: RequestInit,
+  swrOptions?: Parameters<typeof useSWR<T>>[2]
 ) => {
   const { data, error, isLoading, mutate } = useSWR<T>(
     token ? `${url}` : null,
@@ -21,7 +23,8 @@ export const useAppSWR = <T>(
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      } as RequestInit)
+      } as RequestInit),
+    swrOptions
   );
   return {
     data,
@@ -52,8 +55,17 @@ export const appFetch = async (
     return null;
   }
 };
-
-export const useMessageTempaltes = (access_token?: string) => {
+export const simpleAppFetch = async <T>(url: string, options?: RequestInit) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const data: BasicResultVo<T> = await response.json();
+  return data;
+};
+export const useMessageTemplates = (access_token?: string) => {
   const { data, mutate } = useAppSWR<BasicResultVo<MessageTemplate[]>>(
     "/api/messageTemplate/list",
     access_token
@@ -66,4 +78,55 @@ export const useAccounts = (access_token?: string) => {
     access_token
   );
   return { data: data?.data, mutate };
+};
+
+export const useTraceInfo = (access_token?: string) => {
+  const { data } = useAppSWR<BasicResultVo<string[]>>(
+    "/api/trace",
+    access_token,
+    {},
+    {
+      dedupingInterval: 60 * 1000,
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  );
+  const dataRecords: TraceRecord[] | undefined = data?.data.map((record) =>
+    JSON.parse(record)
+  );
+  const simpleTraceRecord = dataRecords?.reduce<
+    Record<
+      string,
+      {
+        id: string;
+        logTimeStamp: number;
+        state: TraceRecord["state"][];
+        contentModel: string;
+        receiver: string[];
+        messageTemplateId: number;
+        sendAccountId: number;
+      }
+    >
+  >((arr, record) => {
+    if (!arr[record.simpleTaskInfo.messageId]) {
+      arr[record.simpleTaskInfo.messageId] = {
+        id: record.simpleTaskInfo.messageId,
+        logTimeStamp: record.logTimestamp,
+        state: [record.state],
+        contentModel: record.simpleTaskInfo.contentModel,
+        receiver: record.simpleTaskInfo.receiver,
+        messageTemplateId: record.simpleTaskInfo.messageTemplateId,
+        sendAccountId: record.simpleTaskInfo.sendAccountId,
+      };
+    } else {
+      arr[record.simpleTaskInfo.messageId].state.push(record.state);
+    }
+    return arr;
+  }, {});
+  console.log(simpleTraceRecord);
+  const simpleRecordList = Object.entries(simpleTraceRecord ?? {}).map(
+    ([name, record]) => record
+  );
+  return { data: simpleRecordList };
 };

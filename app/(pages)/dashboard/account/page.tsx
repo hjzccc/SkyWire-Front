@@ -1,16 +1,15 @@
 "use client";
 import useSWR, { mutate, useSWRConfig } from "swr";
 import React, { useState } from "react";
-import { Button, Form, Input, Modal, Radio, Select } from "antd";
+import { Button, Form, Input, Modal, Radio, Select, Table } from "antd";
 import { SendChannelConfig } from "@/common/configs/AccountConfigs";
-import { useAccountStore } from "@/hooks/accountStore";
 import { useSession } from "next-auth/react";
 import { BasicResultVo, ChannelAccount } from "@/types/backendInterface";
 import { appFetch, useAccounts, useAppSWR } from "@/common/appNetwork";
 import { Toaster } from "react-hot-toast";
 import toast from "react-hot-toast/headless";
 import { respStatusEnum } from "@/common/respStatusEnum";
-import Table, { ColumnType, ColumnsType } from "antd/es/table";
+import { ColumnType, ColumnsType } from "antd/es/table";
 import { table } from "console";
 interface FormValue {
   accountName: string;
@@ -82,20 +81,31 @@ function Page() {
           </span>
         ),
       },
+      {
+        title: "operation",
+        key: "operation",
+        render: (text, record) => (
+          <Radio.Group>
+            <Radio.Button>Delete</Radio.Button>
+            <Radio.Button>Edit</Radio.Button>
+          </Radio.Group>
+        ),
+      },
     ];
   return (
     <>
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-3">
         <Toaster position="top-center" reverseOrder={false} />
         <div>
-          <Button
-            className="mx-2 my-2"
-            type="primary"
-            onClick={() => setModalOpen(true)}
-          >
+          <Button type="primary" onClick={() => setModalOpen(true)}>
             New
           </Button>
         </div>
+        <Table
+          dataSource={channelAccounts}
+          columns={tableColumn}
+          bordered
+        ></Table>
       </div>
       <Modal
         open={modalOpen}
@@ -105,7 +115,7 @@ function Page() {
           form.submit();
         }}
       >
-        <Form form={form} onFinish={onFinishSuccess}>
+        <Form form={form} onFinish={onFinishSuccess} className="px-5 py-5">
           <Form.Item
             rules={[
               {
@@ -147,7 +157,6 @@ function Page() {
             ))}
         </Form>
       </Modal>
-      <Table dataSource={channelAccounts} columns={tableColumn}></Table>
     </>
   );
 }
