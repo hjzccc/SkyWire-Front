@@ -8,18 +8,20 @@ import {
   getPlaceHolders,
   replacePlaceHolders,
 } from "@/common/placeHolderUtils";
-import { useMessageTemplateStore } from "@/hooks/messageTemplateStore";
 import { table } from "console";
-import { BasicResultVo, MessageTemplate } from "@/types/backendInterface";
+import {
+  BasicResultVo,
+  MessageTemplate,
+  SendRequest,
+} from "@/types/backendInterface";
 import {
   appFetch,
   useAccounts,
   useAppSWR,
-  useMessageTempaltes,
+  useMessageTemplates,
 } from "@/common/appNetwork";
 import { mutate } from "swr";
 import { useSession } from "next-auth/react";
-import { useAccountStore } from "@/hooks/accountStore";
 import { respStatusEnum } from "@/common/respStatusEnum";
 type FormValueType = {
   id?: number;
@@ -34,7 +36,7 @@ function Page() {
     session?.access_token
   );
   const { data: messageTemplateData, mutate: mutateMessageTemplate } =
-    useMessageTempaltes(session?.access_token);
+    useMessageTemplates(session?.access_token);
   console.log(messageTemplateData);
   const [form] = Form.useForm();
   const [testForm] = Form.useForm();
@@ -127,13 +129,21 @@ function Page() {
   };
   return (
     <>
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-3">
         <div>
-          <Button type={"primary"} onClick={() => setModalOpen(true)}>
+          <Button
+            className=""
+            type={"primary"}
+            onClick={() => setModalOpen(true)}
+          >
             New
           </Button>
         </div>
-        <Table dataSource={messageTemplateData} columns={tableColumns}></Table>
+        <Table
+          dataSource={messageTemplateData}
+          columns={tableColumns}
+          bordered
+        ></Table>
       </div>
       <Modal
         destroyOnClose={true}
@@ -146,7 +156,7 @@ function Page() {
           form.submit();
         }}
       >
-        <Form form={form} onFinish={onFinishSuccess}>
+        <Form form={form} onFinish={onFinishSuccess} className="px-5 py-5">
           <Form.Item name="id" label="id" style={{ display: "none" }}>
             <Input></Input>
           </Form.Item>
@@ -231,16 +241,33 @@ function Page() {
       >
         <Form
           form={testForm}
-          onFinish={(values: {
-            recevier: string;
+          onFinish={async (value: {
+            receiver: string;
             configs: Record<string, string>;
           }) => {
-            console.log(values);
+            console.log(value);
             const assembledMessage = replacePlaceHolders(
-              values.configs,
+              value.configs,
               testMessageTemplate?.msgContent ?? ""
             );
             console.log(assembledMessage);
+            let sendRequest: Partial<SendRequest> = {
+              code: "send",
+              messageTemplateId: testMessageTemplate?.id,
+              messageParam: {
+                receiver: value.receiver,
+                msgContent: assembledMessage,
+              },
+            };
+            console.log(sendRequest);
+            const response = await appFetch(
+              "/api/send",
+              session?.access_token,
+              {
+                method: "POST",
+                body: JSON.stringify(sendRequest),
+              }
+            );
           }}
         >
           <Form.Item label="Receiver" name="receiver">
