@@ -40,6 +40,7 @@ export default function RootLayout({
                         src={Icon}
                         height={28}
                         className=" fill-white"
+                        alt=""
                       ></Image>
                       <Button
                         type="link"

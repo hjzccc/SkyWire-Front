@@ -1,5 +1,14 @@
 "use client";
-import { Button, Form, Input, Modal, Radio, Select, Table } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Radio,
+  Select,
+  Table,
+} from "antd";
 import React, { useState } from "react";
 import { SendChannelConfig } from "@/common/configs/AccountConfigs";
 import { ColumnsType } from "antd/es/table";
@@ -23,6 +32,7 @@ import {
 import { mutate } from "swr";
 import { useSession } from "next-auth/react";
 import { respStatusEnum } from "@/common/respStatusEnum";
+import toast, { Toaster } from "react-hot-toast";
 type FormValueType = {
   id?: number;
   name: string;
@@ -54,7 +64,7 @@ function Page() {
     {
       title: "ID",
       key: "id",
-      render: (text, record) => <span>{record.id}</span>,
+      render: (_, record) => <span>{record.id}</span>,
     },
     {
       title: "Name",
@@ -89,13 +99,38 @@ function Page() {
               for (const key in configs) {
                 form.setFieldValue(["config", key], configs[key]);
               }
+              setModalOpen(true);
             }}
           >
             Edit
           </Radio.Button>
           <Radio.Button>Copy</Radio.Button>
           <Radio.Button>Recall</Radio.Button>
-          <Radio.Button>Delete</Radio.Button>
+          <Popconfirm
+            title="Delete"
+            description="Are you sure to delete this?"
+            onConfirm={async () => {
+              try {
+                const response = await appFetch(
+                  `/api/messageTemplate/${record.id}`,
+                  session?.access_token,
+                  {
+                    method: "DELETE",
+                  }
+                );
+                if (response?.status == respStatusEnum.SUCCESS) {
+                  mutateMessageTemplate();
+                  toast.success(response.msg ?? "success");
+                } else {
+                  throw Error(response?.msg ?? "fail");
+                }
+              } catch (e: any) {
+                toast.error(e.message);
+              }
+            }}
+          >
+            <Radio.Button>Delete</Radio.Button>
+          </Popconfirm>
         </Radio.Group>
       ),
     },
@@ -109,7 +144,7 @@ function Page() {
       msgContent: JSON.stringify(value.config),
     };
     try {
-      let response: BasicResultVo<any> = await appFetch(
+      let response = await appFetch(
         "/api/messageTemplate/save",
         session?.access_token,
         {
@@ -117,18 +152,22 @@ function Page() {
           body: JSON.stringify(messageTemplate),
         }
       );
-      if (response.status == respStatusEnum.SUCCESS) {
+      if (response?.status == respStatusEnum.SUCCESS) {
         mutateMessageTemplate();
         form.resetFields();
         setModalOpen(false);
-        return;
+        toast.success(response.msg);
+      } else {
+        throw Error(response?.msg ?? "fail");
       }
-    } catch (e) {
+    } catch (e: any) {
+      toast.error(e.message);
       console.log(e);
     }
   };
   return (
     <>
+      <Toaster></Toaster>
       <div className="flex flex-col gap-3">
         <div>
           <Button
@@ -260,14 +299,25 @@ function Page() {
               },
             };
             console.log(sendRequest);
-            const response = await appFetch(
-              "/api/send",
-              session?.access_token,
-              {
-                method: "POST",
-                body: JSON.stringify(sendRequest),
+            try {
+              const response = await appFetch(
+                "/api/send",
+                session?.access_token,
+                {
+                  method: "POST",
+                  body: JSON.stringify(sendRequest),
+                }
+              );
+              if (response?.status == respStatusEnum.SUCCESS) {
+                toast.success("operation success");
+                setTestModalOpen(false);
+                testForm.resetFields();
+              } else {
+                throw Error(response?.msg);
               }
-            );
+            } catch (e: any) {
+              toast.error(e.message);
+            }
           }}
         >
           <Form.Item label="Receiver" name="receiver">

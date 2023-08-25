@@ -33,7 +33,7 @@ export const useAppSWR = <T>(
     mutate,
   };
 };
-export const appFetch = async (
+export const appFetch = async <T>(
   url: string,
   token?: string,
   options?: RequestInit
@@ -49,7 +49,7 @@ export const appFetch = async (
         },
       }
     );
-    const data = await response.json();
+    const data: BasicResultVo<T> = await response.json();
     return data;
   } else {
     return null;

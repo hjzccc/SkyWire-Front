@@ -1,19 +1,29 @@
 "use client";
 import useSWR, { mutate, useSWRConfig } from "swr";
 import React, { useState } from "react";
-import { Button, Form, Input, Modal, Radio, Select, Table } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Radio,
+  Select,
+  Table,
+} from "antd";
 import { SendChannelConfig } from "@/common/configs/AccountConfigs";
 import { useSession } from "next-auth/react";
 import { BasicResultVo, ChannelAccount } from "@/types/backendInterface";
 import { appFetch, useAccounts, useAppSWR } from "@/common/appNetwork";
 import { Toaster } from "react-hot-toast";
-import toast from "react-hot-toast/headless";
+import toast from "react-hot-toast";
 import { respStatusEnum } from "@/common/respStatusEnum";
 import { ColumnType, ColumnsType } from "antd/es/table";
 import { table } from "console";
 interface FormValue {
-  accountName: string;
-  accountType: keyof typeof SendChannelConfig;
+  id: number;
+  name: string;
+  sendChannel: keyof typeof SendChannelConfig;
   config: Record<string, string>;
 }
 function Page() {
@@ -24,7 +34,7 @@ function Page() {
   );
   const [form] = Form.useForm();
   const currentAccountType: keyof typeof SendChannelConfig = Form.useWatch(
-    "accountType",
+    "sendChannel",
     form
   );
   const accountOptions = Object.keys(SendChannelConfig).map((key) => ({
@@ -32,12 +42,13 @@ function Page() {
   }));
   const onFinishSuccess = async (value: FormValue) => {
     const account: Partial<ChannelAccount> = {
-      name: value.accountName,
-      sendChannel: SendChannelConfig[value.accountType].id,
+      id: value.id,
+      name: value.name,
+      sendChannel: SendChannelConfig[value.sendChannel].id,
       accountConfig: JSON.stringify(value.config),
     };
     try {
-      const response: BasicResultVo<any> = await appFetch(
+      const response = await appFetch(
         "/api/channelAccount/save",
         session?.access_token,
         {
@@ -45,14 +56,16 @@ function Page() {
           body: JSON.stringify(account),
         }
       );
-      if (response.status == respStatusEnum.SUCCESS) {
-        toast.success(response.msg, { duration: 2000 });
-        setModalOpen(false);
+      if (response?.status == respStatusEnum.SUCCESS) {
+        toast.success(response.msg);
         mutateChannelAccounts();
-        return;
+        form.resetFields();
+        setModalOpen(false);
+      } else {
+        throw Error(response?.msg);
       }
-      toast.error(response.msg);
-    } catch (e) {
+    } catch (e: any) {
+      toast.error(e.message);
       console.log(e);
     }
   };
@@ -86,8 +99,51 @@ function Page() {
         key: "operation",
         render: (text, record) => (
           <Radio.Group>
-            <Radio.Button>Delete</Radio.Button>
-            <Radio.Button>Edit</Radio.Button>
+            <Popconfirm
+              title="Delete"
+              description="Are you sure to delete this?"
+              onConfirm={async () => {
+                try {
+                  const response = await appFetch(
+                    `/api/channelAccount/${record.id}`,
+                    session?.access_token,
+                    {
+                      method: "DELETE",
+                    }
+                  );
+                  if (response?.status == respStatusEnum.SUCCESS) {
+                    mutateChannelAccounts();
+                    toast.success(response.msg ?? "success");
+                  } else {
+                    throw Error(response?.msg ?? "fail");
+                  }
+                } catch (e: any) {
+                  toast.error(e.message);
+                }
+              }}
+            >
+              <Radio.Button>Delete</Radio.Button>
+            </Popconfirm>
+
+            <Radio.Button
+              onClick={() => {
+                form.setFieldValue("id", record.id);
+                form.setFieldValue("name", record.name);
+                let sendChannel = Object.keys(SendChannelConfig).find(
+                  (value) =>
+                    SendChannelConfig[value as keyof typeof SendChannelConfig]
+                      .id == record.sendChannel
+                );
+                form.setFieldValue("sendChannel", sendChannel);
+                let configs = JSON.parse(record.accountConfig);
+                for (const key in configs) {
+                  form.setFieldValue(["config", key], configs[key]);
+                }
+                setModalOpen(true);
+              }}
+            >
+              Edit
+            </Radio.Button>
           </Radio.Group>
         ),
       },
@@ -109,13 +165,18 @@ function Page() {
       </div>
       <Modal
         open={modalOpen}
-        onCancel={() => setModalOpen(false)}
+        onCancel={() => {
+          setModalOpen(false);
+          form.resetFields();
+        }}
         onOk={() => {
-          console.log("Iamok");
           form.submit();
         }}
       >
         <Form form={form} onFinish={onFinishSuccess} className="px-5 py-5">
+          <Form.Item name="id" label="id" style={{ display: "none" }}>
+            <Input></Input>
+          </Form.Item>
           <Form.Item
             rules={[
               {
@@ -124,14 +185,14 @@ function Page() {
               },
             ]}
             label="Account name"
-            name="accountName"
+            name="name"
           >
             <Input />
           </Form.Item>
 
           <Form.Item
             label="Account Type"
-            name="accountType"
+            name="sendChannel"
             rules={[
               {
                 required: true,

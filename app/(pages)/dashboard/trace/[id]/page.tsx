@@ -10,17 +10,25 @@ function Page({ params }: { params: { id: string } }) {
   const record = dataSource
     .find((value) => value.id === params.id)
     ?.state?.sort((a, b) => a.code - b.code);
+  const initialItems = [
+    {
+      color: "gray",
+      children: <p>received by message queue</p>,
+    },
+    {
+      color: "gray",
+      children: <p>send success/fail</p>,
+    },
+  ];
+  record?.forEach((value, index) => {
+    initialItems[index] = {
+      color: "blue",
+      children: <p>{value.description}</p>,
+    };
+  });
   return (
-    <div>
-      <Timeline
-        items={record?.map((value) => ({
-          children: (
-            <>
-              <p>{value.description}</p>
-            </>
-          ),
-        }))}
-      ></Timeline>
+    <div className="flex flex-col items-center justify-center w-screen h-screen ">
+      <Timeline className="scale-150 " items={initialItems}></Timeline>
     </div>
   );
 }
