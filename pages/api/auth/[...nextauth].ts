@@ -19,6 +19,7 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
+      id: "credential",
       credentials: {
         username: {
           label: "Username",
@@ -31,7 +32,6 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         const { username, password } = credentials as any;
-        console.log("credentials", credentials);
         try {
           const responseRaw = await fetch(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
@@ -59,18 +59,49 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
+    CredentialsProvider({
+      name: "AuthCallback",
+      id: "AuthCallback",
+      credentials: {
+        token: {
+          label: "AccessToken",
+          type: "text",
+        },
+      },
+      async authorize(credentials, req) {
+        console.log("start autorize!!!!");
+
+        const { token } = credentials as NonNullable<typeof credentials>;
+        console.log(token);
+        try {
+          const response = await appFetch<string>("/api/authcheck", token);
+          console.log(response);
+          if (response?.status != respStatusEnum.SUCCESS) {
+            throw Error("authentication error, please try again");
+          }
+          return {
+            id: response.data,
+            access_token: token,
+          };
+        } catch (e: any) {
+          console.log(e);
+          return null;
+        }
+      },
+    }),
   ],
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
-    updateAge: 5,
+    maxAge: 7 * 24 * 60 * 60,
   },
   callbacks: {
     async session({ session, user, token }) {
       session.access_token = token?.access_token;
+      console.log("sesionsssssssssssssssssss");
       return session;
     },
     async jwt({ token, user, account, profile }) {
+      console.log("jwttttttttttttttttttt");
       if (user) {
         token.access_token = user.access_token;
       }

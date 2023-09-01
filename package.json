@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ant-design/graphs": "^1.4.0",
+    "@ant-design/icons": "^5.2.5",
     "@headlessui/react": "^1.7.14",
     "@reduxjs/toolkit": "^1.9.5",
     "@types/node": "20.4.5",

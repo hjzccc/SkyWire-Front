@@ -4,6 +4,7 @@ import type { CascaderProps } from "antd";
 import {
   AutoComplete,
   Button,
+  Card,
   Cascader,
   Checkbox,
   Col,
@@ -27,7 +28,7 @@ const App: React.FC = () => {
 
   const onFinish = async (values: any) => {
     const registerParameter: RegisterRequest = {
-      username: values.username,
+      email: values.email,
       password: values.password,
     };
     console.log(registerParameter);
@@ -39,7 +40,7 @@ const App: React.FC = () => {
       if (response.status == respStatusEnum.SUCCESS) {
         toast.success("register success");
         signIn("credentials", {
-          username: values.username,
+          email: values.email,
           password: values.password,
           redirect: true,
           callbackUrl: "/dashboard/messageTemplate",
@@ -55,74 +56,93 @@ const App: React.FC = () => {
   return (
     <>
       <Toaster></Toaster>
-      <div className="flex flex-col items-center">
-        <Image src={Icon} height={48} className="my-10" alt=""></Image>
-        <Form
-          form={form}
-          layout={"vertical"}
-          name="register"
-          onFinish={onFinish}
-          style={{ minWidth: 400 }}
-          scrollToFirstError
-        >
-          <Form.Item
-            name="username"
-            label="Username"
-            rules={[
-              {
-                required: true,
-                message: "Please input your uesrname!",
-              },
-            ]}
+      <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-200">
+        <Card className="shadow-md ">
+          <Form
+            form={form}
+            layout={"vertical"}
+            name="register"
+            onFinish={onFinish}
+            style={{ minWidth: 400 }}
+            scrollToFirstError
           >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[
-              {
-                required: true,
-                message: "Please input your password!",
-              },
-            ]}
-            hasFeedback
-          >
-            <Input.Password />
-          </Form.Item>
-
-          <Form.Item
-            name="confirm"
-            label="Confirm Password"
-            dependencies={["password"]}
-            hasFeedback
-            rules={[
-              {
-                required: true,
-                message: "Please confirm your password!",
-              },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error("The new password that you entered do not match!")
-                  );
+            <Form.Item
+              className="drop-shadow "
+              name="email"
+              label="Email"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your email!",
                 },
-              }),
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item>
-            <Button className="w-full" type="primary" htmlType="submit">
-              Register
-            </Button>
-            Or <Link href="/login">log In!</Link>
-          </Form.Item>
-        </Form>
+                {
+                  type: "email",
+                  message: "Please enter a valid email",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              className="drop-shadow "
+              name="password"
+              label="Password"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your password!",
+                },
+              ]}
+              hasFeedback
+            >
+              <Input.Password />
+            </Form.Item>
+
+            <Form.Item
+              className="drop-shadow "
+              name="confirm"
+              label="Confirm Password"
+              dependencies={["password"]}
+              hasFeedback
+              rules={[
+                {
+                  required: true,
+                  message: "Please confirm your password!",
+                },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error(
+                        "The new password that you entered do not match!"
+                      )
+                    );
+                  },
+                }),
+              ]}
+            >
+              <Input.Password />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                className="w-full font-medium"
+                type="primary"
+                htmlType="submit"
+              >
+                REGISTER
+              </Button>
+              <div className="mt-3">
+                Or{" "}
+                <Link href="/login" className="font-semibold underline">
+                  log In!
+                </Link>
+              </div>
+            </Form.Item>
+          </Form>
+        </Card>
       </div>
     </>
   );

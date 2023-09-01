@@ -30,7 +30,7 @@ export default function RootLayout({
             },
           }}
         >
-          <SessionProvider>
+          <SessionProvider refetchInterval={3600} refetchOnWindowFocus>
             <SWRConfig>
               <Provider store={store}>
                 <div className="flex flex-col ">

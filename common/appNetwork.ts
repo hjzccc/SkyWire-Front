@@ -92,7 +92,7 @@ export const useTraceInfo = (access_token?: string) => {
       revalidateOnReconnect: false,
     }
   );
-  const dataRecords: TraceRecord[] | undefined = data?.data.map((record) =>
+  const dataRecords: TraceRecord[] | undefined = data?.data?.map((record) =>
     JSON.parse(record)
   );
   const simpleTraceRecord = dataRecords?.reduce<

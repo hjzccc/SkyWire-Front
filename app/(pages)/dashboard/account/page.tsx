@@ -12,7 +12,7 @@ import {
   Table,
 } from "antd";
 import { SendChannelConfig } from "@/common/configs/AccountConfigs";
-import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { BasicResultVo, ChannelAccount } from "@/types/backendInterface";
 import { appFetch, useAccounts, useAppSWR } from "@/common/appNetwork";
 import { Toaster } from "react-hot-toast";
