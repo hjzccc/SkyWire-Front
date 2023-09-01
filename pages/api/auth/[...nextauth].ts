@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
       id: "credential",
       credentials: {
         username: {
-          label: "Username",
+          label: "Email",
           type: "text",
         },
         password: {
@@ -31,13 +31,15 @@ export const authOptions: NextAuthOptions = {
         },
       },
       async authorize(credentials, req) {
-        const { username, password } = credentials as any;
+        const { email, password } = credentials as any;
+        console.log("email", email);
+        console.log("password", password);
         try {
           const responseRaw = await fetch(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
             {
               method: "POST",
-              body: JSON.stringify({ username, password }),
+              body: JSON.stringify({ email, password }),
               headers: {
                 "Content-Type": "application/json",
               },
@@ -50,12 +52,12 @@ export const authOptions: NextAuthOptions = {
             throw new Error(response.msg);
           }
           return {
-            id: username,
+            id: email,
             access_token: response.data.access_token,
           };
         } catch (err: any) {
           console.log(err.message);
-          return null;
+          throw err;
         }
       },
     }),
