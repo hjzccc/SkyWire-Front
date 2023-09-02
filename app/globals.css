@@ -1,6 +1,6 @@
 @tailwind base;
 button, [type='button'], [type='reset'], [type='submit'] {
-  @apply bg-blue-400
+  @apply font-semibold bg-blue-600 text-white hover:text-slate-100 hover:bg-blue-500 active:bg-blue-800 active:text-blue-100 focus-visible:outline-blue-600
 }
 
 .ant-modal-content .ant-btn-default{

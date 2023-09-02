@@ -4,11 +4,12 @@ import "../globals.css";
 import { store } from "@/hooks/store";
 import { SessionProvider, signOut } from "next-auth/react";
 import { SWRConfig } from "swr";
-import { Button, ConfigProvider } from "antd";
+import { Button, ConfigProvider, Divider } from "antd";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Icon from "@/public/icon.svg";
 import Image from "next/image";
+import Link from "next/link";
 export default function RootLayout({
   children,
 }: {
@@ -20,55 +21,36 @@ export default function RootLayout({
       <body className="dark">
         <ConfigProvider
           theme={{
-            token: {
-              // Seed Token
-              borderRadius: 2,
-              lineWidth: 1,
-
-              // Alias Token
-              colorBgContainer: " #e2e8f0",
-            },
+            token: {},
           }}
         >
           <SessionProvider refetchInterval={3600} refetchOnWindowFocus>
             <SWRConfig>
               <Provider store={store}>
                 <div className="flex flex-col ">
-                  <div className="flex items-center justify-between gap-6 bg-blue-500 shadow-xl h-14 ">
-                    <div className="flex px-3">
-                      <Image
-                        src={Icon}
-                        height={28}
-                        className=" fill-white"
-                        alt=""
-                      ></Image>
-                      <Button
-                        type="link"
-                        className="h-full text-white bg-inherit "
-                        onClick={() => {
-                          router.push("/dashboard/messageTemplate");
-                        }}
+                  <div className="flex items-center justify-between h-20 gap-6 border-b">
+                    <div className="flex items-center px-3 gap-9 ">
+                      <p className="block text-2xl font-semibold text-blue-600 font-comfortta">
+                        Skywire
+                      </p>
+                      <Link
+                        className="px-2 py-1 text-sm rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                        href={"/dashboard/messageTemplate"}
                       >
-                        MessageTemplate
-                      </Button>
-                      <Button
-                        type="link"
-                        className="h-full text-white bg-inherit "
-                        onClick={() => {
-                          router.push("/dashboard/account");
-                        }}
+                        Templates
+                      </Link>
+                      <Link
+                        className="px-2 py-1 text-sm rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900 "
+                        href={"/dashboard/account"}
                       >
                         Account
-                      </Button>
-                      <Button
-                        type="link"
-                        className="h-full text-white bg-inherit "
-                        onClick={() => {
-                          router.push("/dashboard/trace");
-                        }}
+                      </Link>
+                      <Link
+                        className="px-2 py-1 text-sm rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900 "
+                        href={"/dashboard/trace"}
                       >
                         History
-                      </Button>
+                      </Link>
                     </div>
                     <div className="mr-20 ">
                       <Button
