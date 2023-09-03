@@ -60,93 +60,94 @@ const App: React.FC = () => {
     <>
       <Toaster></Toaster>
       <div className="flex flex-col items-center justify-center w-full h-full bg-gray-200">
-        <Card className="shadow-md ">
-          <Form
-            form={form}
-            layout={"vertical"}
-            name="register"
-            onFinish={onFinish}
-            style={{ minWidth: 400 }}
-            scrollToFirstError
-          >
-            <Form.Item
-              className="drop-shadow "
-              name="email"
-              label="Email"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input your email!",
-                },
-                {
-                  type: "email",
-                  message: "Please enter a valid email",
-                },
-              ]}
+        <div className="w-full max-w-lg p-3">
+          <Card className="shadow-md ">
+            <Form
+              form={form}
+              layout={"vertical"}
+              name="register"
+              onFinish={onFinish}
+              scrollToFirstError
             >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              className="drop-shadow "
-              name="password"
-              label="Password"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input your password!",
-                },
-              ]}
-              hasFeedback
-            >
-              <Input.Password />
-            </Form.Item>
-
-            <Form.Item
-              className="drop-shadow "
-              name="confirm"
-              label="Confirm Password"
-              dependencies={["password"]}
-              hasFeedback
-              rules={[
-                {
-                  required: true,
-                  message: "Please confirm your password!",
-                },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue("password") === value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(
-                      new Error(
-                        "The new password that you entered do not match!"
-                      )
-                    );
+              <Form.Item
+                className="drop-shadow "
+                name="email"
+                label="Email"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your email!",
                   },
-                }),
-              ]}
-            >
-              <Input.Password />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                className="w-full font-medium"
-                type="primary"
-                htmlType="submit"
-                loading={isLoading}
+                  {
+                    type: "email",
+                    message: "Please enter a valid email",
+                  },
+                ]}
               >
-                REGISTER
-              </Button>
-              <div className="mt-3">
-                Or{" "}
-                <Link href="/login" className="font-semibold underline">
-                  log In!
-                </Link>
-              </div>
-            </Form.Item>
-          </Form>
-        </Card>
+                <Input />
+              </Form.Item>
+
+              <Form.Item
+                className="drop-shadow "
+                name="password"
+                label="Password"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your password!",
+                  },
+                ]}
+                hasFeedback
+              >
+                <Input.Password />
+              </Form.Item>
+
+              <Form.Item
+                className="drop-shadow "
+                name="confirm"
+                label="Confirm Password"
+                dependencies={["password"]}
+                hasFeedback
+                rules={[
+                  {
+                    required: true,
+                    message: "Please confirm your password!",
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue("password") === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(
+                        new Error(
+                          "The new password that you entered do not match!"
+                        )
+                      );
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password />
+              </Form.Item>
+              <Form.Item>
+                <Button
+                  className="w-full font-medium"
+                  type="primary"
+                  htmlType="submit"
+                  loading={isLoading}
+                >
+                  REGISTER
+                </Button>
+                <div className="mt-3">
+                  Or{" "}
+                  <Link href="/login" className="font-semibold underline">
+                    log In!
+                  </Link>
+                </div>
+              </Form.Item>
+            </Form>
+          </Card>
+        </div>
       </div>
     </>
   );

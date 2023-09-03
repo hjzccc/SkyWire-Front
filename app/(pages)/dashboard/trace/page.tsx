@@ -40,19 +40,22 @@ function Page() {
     },
   ];
   return (
-    <Table
-      dataSource={dataSource}
-      columns={tableColumns}
-      loading={isLoading}
-      onRow={(record, index) => ({
-        onClick: (event) => {
-          router.push(`/dashboard/trace/${record.id}`);
-        },
-        style: {
-          cursor: "pointer",
-        },
-      })}
-    ></Table>
+    <div>
+      <Table
+        scroll={{ x: 200 }}
+        dataSource={dataSource}
+        columns={tableColumns}
+        loading={isLoading}
+        onRow={(record, index) => ({
+          onClick: (event) => {
+            router.push(`/dashboard/trace/${record.id}`);
+          },
+          style: {
+            cursor: "pointer",
+          },
+        })}
+      ></Table>
+    </div>
   );
 }
 

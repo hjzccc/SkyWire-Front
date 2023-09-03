@@ -33,71 +33,69 @@ const App: React.FC = () => {
     <>
       <Toaster></Toaster>
       <div className="flex flex-col items-center justify-center w-full h-full bg-gray-200">
-        <Card className="py-10 shadow-md">
-          <div className="flex flex-col items-center font-sans justify-evenly">
-            <span className="mb-5 text-xl font-semibold">
-              WelCome to SkyWire!
-            </span>
-            <Form
-              name="normal_login"
-              style={{ minWidth: 400 }}
-              onFinish={onFinish}
-            >
-              <Form.Item
-                className="drop-shadow "
-                name="email"
-                rules={[
-                  { required: true, message: "Please input your email!" },
-                  { type: "email", message: "Please enter a valid email" },
-                ]}
-              >
-                <Input
-                  prefix={<UserOutlined className="site-form-item-icon" />}
-                  placeholder="Email"
-                />
-              </Form.Item>
-              <Form.Item
-                className="drop-shadow"
-                name="password"
-                rules={[
-                  { required: true, message: "Please input your Password!" },
-                ]}
-              >
-                <Input
-                  prefix={<LockOutlined className="site-form-item-icon" />}
-                  type="password"
-                  placeholder="Password"
-                />
-              </Form.Item>
+        <div className="w-full max-w-lg p-3">
+          <Card className="shadow-md ">
+            <div className="flex flex-col items-center w-full font-sans">
+              <span className="mb-5 text-xl font-semibold ">
+                WelCome to SkyWire!
+              </span>
+              <Form name="normal_login" className="w-full" onFinish={onFinish}>
+                <Form.Item
+                  className="drop-shadow "
+                  name="email"
+                  rules={[
+                    { required: true, message: "Please input your email!" },
+                    { type: "email", message: "Please enter a valid email" },
+                  ]}
+                >
+                  <Input
+                    prefix={<UserOutlined className="site-form-item-icon" />}
+                    placeholder="Email"
+                  />
+                </Form.Item>
+                <Form.Item
+                  className="drop-shadow"
+                  name="password"
+                  rules={[
+                    { required: true, message: "Please input your Password!" },
+                  ]}
+                >
+                  <Input
+                    prefix={<LockOutlined className="site-form-item-icon" />}
+                    type="password"
+                    placeholder="Password"
+                  />
+                </Form.Item>
 
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  className="w-full font-medium"
-                  loading={isLoading}
-                >
-                  LOG IN
-                </Button>
-                <Button
-                  type="primary"
-                  className="w-full mt-2 bg-black "
-                  href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/oauth2/authorization/github`}
-                >
-                  <div className="flex items-center justify-center gap-3">
-                    <GithubOutlined /> SIGN IN WITH GITHUB
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    className="w-full font-medium"
+                    loading={isLoading}
+                  >
+                    LOG IN
+                  </Button>
+                  <Button
+                    type="primary"
+                    className="w-full mt-2 bg-black "
+                    href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/oauth2/authorization/github`}
+                  >
+                    <div className="flex items-center justify-center gap-3">
+                      <GithubOutlined /> SIGN IN WITH GITHUB
+                    </div>
+                  </Button>
+                  <div className="mt-3">
+                    Or{" "}
+                    <Link href="/register" className="font-semibold underline">
+                      register now!
+                    </Link>
                   </div>
-                </Button>
-                <div className="mt-3">
-                  Or{" "}
-                  <Link href="/register" className="font-semibold underline">
-                    register now!
-                  </Link>
-                </div>
-              </Form.Item>
-            </Form>
-          </div>
-        </Card>
+                </Form.Item>
+              </Form>
+            </div>
+          </Card>
+        </div>
       </div>
     </>
   );

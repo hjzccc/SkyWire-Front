@@ -182,7 +182,6 @@ function AccountPage() {
   return (
     <>
       <div className="flex flex-col gap-3">
-        <Toaster position="top-center" reverseOrder={false} />
         <div>
           <Button type="primary" onClick={() => setModalOpen(true)}>
             New
@@ -404,7 +403,7 @@ function Page() {
   return (
     <>
       <Toaster></Toaster>
-      <div className="flex gap-3 justify-evenly">
+      <div className="flex flex-col gap-3 lg:flex-row">
         <Card title="Templates" className="flex-1">
           <Button
             className="mb-3"
@@ -551,6 +550,7 @@ function Page() {
                 }
               );
               if (response?.status == respStatusEnum.SUCCESS) {
+                console.log("ejwjffjwjfiwjwfjfjfjjfwwfjj");
                 toast.success("operation success");
                 setTestModalOpen(false);
                 testForm.resetFields();
