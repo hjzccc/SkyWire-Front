@@ -27,7 +27,7 @@ export default function RootLayout({
           <SessionProvider refetchInterval={3600} refetchOnWindowFocus>
             <SWRConfig>
               <Provider store={store}>
-                <div className="flex flex-col ">
+                <div className="flex flex-col h-screen ">
                   <div className="flex items-center justify-between h-20 gap-6 border-b">
                     <div className="flex items-center px-3 gap-9 ">
                       <p className="block text-2xl font-semibold text-blue-600 font-comfortta">
@@ -46,7 +46,7 @@ export default function RootLayout({
                         History
                       </Link>
                     </div>
-                    <div className="mr-20 ">
+                    <div className="">
                       <Button
                         type="link"
                         className="mr-4 text-white"
@@ -58,7 +58,7 @@ export default function RootLayout({
                       </Button>
                     </div>
                   </div>
-                  <div className="mx-2 my-4 ">{children}</div>
+                  <div className="flex-1 mx-2 my-4">{children}</div>
                 </div>
               </Provider>
             </SWRConfig>

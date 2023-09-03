@@ -8,7 +8,7 @@ import React from "react";
 
 function Page() {
   const { data: session } = useSession();
-  const { data: dataSource } = useTraceInfo(session?.access_token);
+  const { data: dataSource, isLoading } = useTraceInfo(session?.access_token);
   const router = useRouter();
   const tableColumns: ColumnsType<NonNullable<typeof dataSource>[number]> = [
     {
@@ -43,6 +43,7 @@ function Page() {
     <Table
       dataSource={dataSource}
       columns={tableColumns}
+      loading={isLoading}
       onRow={(record, index) => ({
         onClick: (event) => {
           router.push(`/dashboard/trace/${record.id}`);

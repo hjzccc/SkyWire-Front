@@ -79,15 +79,12 @@ export const useAccounts = (access_token?: string) => {
 };
 
 export const useTraceInfo = (access_token?: string) => {
-  const { data } = useAppSWR<BasicResultVo<string[]>>(
+  const { data, isLoading } = useAppSWR<BasicResultVo<string[]>>(
     "/api/trace",
     access_token,
     {},
     {
-      dedupingInterval: 60 * 1000,
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
+      dedupingInterval: 20 * 1000,
     }
   );
   const dataRecords: TraceRecord[] | undefined = data?.data?.map((record) =>
@@ -126,5 +123,5 @@ export const useTraceInfo = (access_token?: string) => {
   const simpleRecordList = Object.entries(simpleTraceRecord ?? {}).map(
     ([name, record]) => record
   );
-  return { data: simpleRecordList };
+  return { data: simpleRecordList, isLoading };
 };

@@ -32,7 +32,7 @@ const App: React.FC = () => {
   return (
     <>
       <Toaster></Toaster>
-      <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-200">
+      <div className="flex flex-col items-center justify-center w-full h-full bg-gray-200">
         <Card className="py-10 shadow-md">
           <div className="flex flex-col items-center font-sans justify-evenly">
             <span className="mb-5 text-xl font-semibold">

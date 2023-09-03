@@ -59,7 +59,7 @@ const App: React.FC = () => {
   return (
     <>
       <Toaster></Toaster>
-      <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-200">
+      <div className="flex flex-col items-center justify-center w-full h-full bg-gray-200">
         <Card className="shadow-md ">
           <Form
             form={form}

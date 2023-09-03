@@ -1,34 +1,46 @@
 "use client";
 import { useTraceInfo } from "@/common/appNetwork";
-import { Timeline } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Steps, Timeline } from "antd";
 import { useSession } from "next-auth/react";
-import React from "react";
+import React, { useState } from "react";
 
 function Page({ params }: { params: { id: string } }) {
   const { data: session } = useSession();
   const { data: dataSource } = useTraceInfo(session?.access_token);
-  const record = dataSource
-    .find((value) => value.id === params.id)
-    ?.state?.sort((a, b) => a.code - b.code);
+  const record =
+    dataSource
+      .find((value) => value.id === params.id)
+      ?.state?.sort((a, b) => a.code - b.code) ?? [];
   const initialItems = [
     {
-      color: "gray",
-      children: <p>received by message queue</p>,
+      title: "Waiting to process",
+      icon: record.length == 0 ? <LoadingOutlined /> : null,
     },
     {
-      color: "gray",
-      children: <p>send success/fail</p>,
+      title: "Processing",
+      icon: record.length == 1 ? <LoadingOutlined /> : null,
+    },
+    {
+      title: "Done",
     },
   ];
-  record?.forEach((value, index) => {
-    initialItems[index] = {
-      color: "blue",
-      children: <p>{value.description}</p>,
-    };
-  });
+  let status: "error" | "process" | "finish" | "wait" = "process";
+  if (record.length == 2) {
+    if (record[1].code == 60) {
+      status = "finish";
+    } else {
+      status = "error";
+    }
+  }
   return (
-    <div className="flex flex-col items-center justify-center w-screen h-screen ">
-      <Timeline className="scale-150 " items={initialItems}></Timeline>
+    <div className="flex flex-col items-center justify-center h-full">
+      <Steps
+        current={record.length}
+        status={status}
+        className="w-1/2 "
+        items={initialItems}
+      ></Steps>
     </div>
   );
 }
