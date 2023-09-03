@@ -34,7 +34,7 @@ function Page({ params }: { params: { id: string } }) {
     }
   }
   return (
-    <div className="flex items-center justify-center h-full">
+    <div className="flex items-center justify-center h-screen overflow-hidden">
       <Steps
         style={{ height: "50%" }}
         current={record.length}
