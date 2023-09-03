@@ -66,18 +66,16 @@ export const simpleAppFetch = async <T>(url: string, options?: RequestInit) => {
   return data;
 };
 export const useMessageTemplates = (access_token?: string) => {
-  const { data, mutate } = useAppSWR<BasicResultVo<MessageTemplate[]>>(
-    "/api/messageTemplate/list",
-    access_token
-  );
-  return { data: data?.data, mutate };
+  const { data, mutate, isLoading } = useAppSWR<
+    BasicResultVo<MessageTemplate[]>
+  >("/api/messageTemplate/list", access_token);
+  return { data: data?.data, mutate, isLoading };
 };
 export const useAccounts = (access_token?: string) => {
-  const { data, mutate } = useAppSWR<BasicResultVo<ChannelAccount[]>>(
-    "/api/channelAccount/list",
-    access_token
-  );
-  return { data: data?.data, mutate };
+  const { data, mutate, isLoading } = useAppSWR<
+    BasicResultVo<ChannelAccount[]>
+  >("/api/channelAccount/list", access_token);
+  return { data: data?.data, mutate, isLoading };
 };
 
 export const useTraceInfo = (access_token?: string) => {

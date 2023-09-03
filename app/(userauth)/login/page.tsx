@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { GithubOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Card, Checkbox, Form, Input } from "antd";
 import { signIn } from "next-auth/react";
@@ -11,7 +11,9 @@ import toast, { ToastBar, Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 const App: React.FC = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const onFinish = async (values: any) => {
+    setIsLoading(true);
     console.log("Received values of form: ", values);
     const response = await signIn("credential", {
       email: values.email,
@@ -24,6 +26,7 @@ const App: React.FC = () => {
     } else {
       router.push("/dashboard/messageTemplate");
     }
+    setIsLoading(false);
   };
 
   return (
@@ -72,6 +75,7 @@ const App: React.FC = () => {
                   type="primary"
                   htmlType="submit"
                   className="w-full font-medium"
+                  loading={isLoading}
                 >
                   LOG IN
                 </Button>

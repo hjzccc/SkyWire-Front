@@ -4,7 +4,10 @@ button, [type='button'], [type='reset'], [type='submit'] {
 }
 
 .ant-modal-content .ant-btn-default{
-  @apply bg-inherit
+  @apply bg-inherit text-black
+}
+.ant-select-selector{
+  @apply shadow-inner
 }
 @tailwind components;
 @tailwind utilities;

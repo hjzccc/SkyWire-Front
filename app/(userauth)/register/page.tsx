@@ -25,8 +25,9 @@ import { signIn } from "next-auth/react";
 
 const App: React.FC = () => {
   const [form] = Form.useForm();
-
+  const [isLoading, setIsLoading] = useState(false);
   const onFinish = async (values: any) => {
+    setIsLoading(true);
     const registerParameter: RegisterRequest = {
       email: values.email,
       password: values.password,
@@ -39,7 +40,7 @@ const App: React.FC = () => {
       });
       if (response.status == respStatusEnum.SUCCESS) {
         toast.success("register success");
-        signIn("credentials", {
+        signIn("credential", {
           email: values.email,
           password: values.password,
           redirect: true,
@@ -50,6 +51,8 @@ const App: React.FC = () => {
       }
     } catch (e: any) {
       toast.error(e.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -131,6 +134,7 @@ const App: React.FC = () => {
                 className="w-full font-medium"
                 type="primary"
                 htmlType="submit"
+                loading={isLoading}
               >
                 REGISTER
               </Button>

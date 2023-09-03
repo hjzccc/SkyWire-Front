@@ -1,6 +1,8 @@
 "use client";
 import {
   Button,
+  Card,
+  FloatButton,
   Form,
   Input,
   Modal,
@@ -20,6 +22,7 @@ import {
 import { table } from "console";
 import {
   BasicResultVo,
+  ChannelAccount,
   MessageTemplate,
   SendRequest,
 } from "@/types/backendInterface";
@@ -33,6 +36,12 @@ import { mutate } from "swr";
 import { useSession } from "next-auth/react";
 import { respStatusEnum } from "@/common/respStatusEnum";
 import toast, { Toaster } from "react-hot-toast";
+import {
+  CommentOutlined,
+  ContactsOutlined,
+  CustomerServiceOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 type FormValueType = {
   id?: number;
   name: string;
@@ -40,15 +49,224 @@ type FormValueType = {
   accountId: number;
   config: Record<string, string>;
 };
+function AccountPage() {
+  interface FormValue {
+    id: number;
+    name: string;
+    sendChannel: keyof typeof SendChannelConfig;
+    config: Record<string, string>;
+  }
+  const [modalOpen, setModalOpen] = useState(false);
+  const { data: session } = useSession();
+  const {
+    data: channelAccounts,
+    mutate: mutateChannelAccounts,
+    isLoading,
+  } = useAccounts(session?.access_token);
+  const [form] = Form.useForm();
+  const currentAccountType: keyof typeof SendChannelConfig = Form.useWatch(
+    "sendChannel",
+    form
+  );
+  const accountOptions = Object.keys(SendChannelConfig).map((key) => ({
+    value: key,
+  }));
+  const onFinishSuccess = async (value: FormValue) => {
+    const account: Partial<ChannelAccount> = {
+      id: value.id,
+      name: value.name,
+      sendChannel: SendChannelConfig[value.sendChannel].id,
+      accountConfig: JSON.stringify(value.config),
+    };
+    try {
+      const response = await appFetch(
+        "/api/channelAccount/save",
+        session?.access_token,
+        {
+          method: "POST",
+          body: JSON.stringify(account),
+        }
+      );
+      if (response?.status == respStatusEnum.SUCCESS) {
+        toast.success(response.msg);
+        mutateChannelAccounts();
+        form.resetFields();
+        setModalOpen(false);
+      } else {
+        throw Error(response?.msg);
+      }
+    } catch (e: any) {
+      toast.error(e.message);
+      console.log(e);
+    }
+  };
+  const tableColumn: ColumnsType<NonNullable<typeof channelAccounts>[number]> =
+    [
+      {
+        title: "ID",
+        key: "id",
+        render: (text, record) => <span>{record.id}</span>,
+      },
+      {
+        title: "Name",
+        key: "name",
+        render: (text, record) => <span>{record.name}</span>,
+      },
+      {
+        title: "channel",
+        key: "channel",
+        render: (text, record) => (
+          <span>
+            {Object.keys(SendChannelConfig).find(
+              (value) =>
+                SendChannelConfig[value as keyof typeof SendChannelConfig].id ==
+                record.sendChannel
+            )}
+          </span>
+        ),
+      },
+      {
+        title: "operation",
+        key: "operation",
+        render: (text, record) => (
+          <Radio.Group>
+            <Popconfirm
+              title="Delete"
+              description="Are you sure to delete this?"
+              onConfirm={async () => {
+                try {
+                  const response = await appFetch(
+                    `/api/channelAccount/${record.id}`,
+                    session?.access_token,
+                    {
+                      method: "DELETE",
+                    }
+                  );
+                  if (response?.status == respStatusEnum.SUCCESS) {
+                    mutateChannelAccounts();
+                    toast.success(response.msg ?? "success");
+                  } else {
+                    throw Error(response?.msg ?? "fail");
+                  }
+                } catch (e: any) {
+                  toast.error(e.message);
+                }
+              }}
+            >
+              <Radio.Button>Delete</Radio.Button>
+            </Popconfirm>
+
+            <Radio.Button
+              onClick={() => {
+                form.setFieldValue("id", record.id);
+                form.setFieldValue("name", record.name);
+                let sendChannel = Object.keys(SendChannelConfig).find(
+                  (value) =>
+                    SendChannelConfig[value as keyof typeof SendChannelConfig]
+                      .id == record.sendChannel
+                );
+                form.setFieldValue("sendChannel", sendChannel);
+                let configs = JSON.parse(record.accountConfig);
+                for (const key in configs) {
+                  form.setFieldValue(["config", key], configs[key]);
+                }
+                setModalOpen(true);
+              }}
+            >
+              Edit
+            </Radio.Button>
+          </Radio.Group>
+        ),
+      },
+    ];
+  return (
+    <>
+      <div className="flex flex-col gap-3">
+        <Toaster position="top-center" reverseOrder={false} />
+        <div>
+          <Button type="primary" onClick={() => setModalOpen(true)}>
+            New
+          </Button>
+        </div>
+        <Table
+          dataSource={channelAccounts}
+          pagination={{ pageSize: 5 }}
+          columns={tableColumn}
+          bordered
+          loading={isLoading}
+        ></Table>
+      </div>
+      <Modal
+        open={modalOpen}
+        onCancel={() => {
+          setModalOpen(false);
+          form.resetFields();
+        }}
+        onOk={() => {
+          form.submit();
+        }}
+      >
+        <Form form={form} onFinish={onFinishSuccess} className="px-5 py-5">
+          <Form.Item name="id" label="id" style={{ display: "none" }}>
+            <Input></Input>
+          </Form.Item>
+          <Form.Item
+            rules={[
+              {
+                required: true,
+                message: "Please input account name",
+              },
+            ]}
+            label="Account name"
+            name="name"
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Account Type"
+            name="sendChannel"
+            rules={[
+              {
+                required: true,
+                message: "Please select account type",
+              },
+            ]}
+          >
+            <Radio.Group>
+              {accountOptions.map((option, index) => (
+                <Radio key={index} value={option.value}>
+                  {option.value[0].toUpperCase() + option.value.slice(1)}
+                </Radio>
+              ))}
+            </Radio.Group>
+          </Form.Item>
+          {SendChannelConfig[currentAccountType] &&
+            Object.keys(
+              SendChannelConfig[currentAccountType].accountTEmpalte
+            ).map((key, index) => (
+              <Form.Item key={index} label={key} name={["config", key]}>
+                <Input />
+              </Form.Item>
+            ))}
+        </Form>
+      </Modal>
+    </>
+  );
+}
+
 function Page() {
   const { data: session } = useSession();
-  const { data: accountsData, mutate: mutateAccount } = useAccounts(
+  const { data: channelAccounts, mutate: mutateChannelAccounts } = useAccounts(
     session?.access_token
   );
-  const { data: messageTemplateData, mutate: mutateMessageTemplate } =
-    useMessageTemplates(session?.access_token);
+  const {
+    data: messageTemplateData,
+    mutate: mutateMessageTemplate,
+    isLoading,
+  } = useMessageTemplates(session?.access_token);
   console.log(messageTemplateData);
-  const [form] = Form.useForm();
+  const [newTemplateForm] = Form.useForm();
   const [testForm] = Form.useForm();
   const [modalOpen, setModalOpen] = useState(false);
   const [testModalOpen, setTestModalOpen] = useState(false);
@@ -56,7 +274,7 @@ function Page() {
     useState<MessageTemplate>();
   const currentChannelType: keyof typeof SendChannelConfig = Form.useWatch(
     "sendChannel",
-    form
+    newTemplateForm
   );
   const tableColumns: ColumnsType<
     NonNullable<typeof messageTemplateData>[number]
@@ -70,6 +288,23 @@ function Page() {
       title: "Name",
       key: "name",
       render: (text, record) => <span>{record.name}</span>,
+    },
+    {
+      title: "Channel",
+      key: "channel",
+      render: (text, record) => {
+        let sendChannel =
+          Object.keys(SendChannelConfig).find(
+            (value) =>
+              SendChannelConfig[value as keyof typeof SendChannelConfig].id ==
+              record.sendChannel
+          ) ?? "Default";
+        return (
+          <span>
+            {sendChannel[0].toUpperCase().concat(sendChannel.slice(1))}
+          </span>
+        );
+      },
     },
     {
       title: "Operations",
@@ -86,18 +321,18 @@ function Page() {
           </Radio.Button>
           <Radio.Button
             onClick={() => {
-              form.setFieldValue("id", record.id);
-              form.setFieldValue("name", record.name);
+              newTemplateForm.setFieldValue("id", record.id);
+              newTemplateForm.setFieldValue("name", record.name);
               let sendChannel = Object.keys(SendChannelConfig).find(
                 (value) =>
                   SendChannelConfig[value as keyof typeof SendChannelConfig]
                     .id == record.sendChannel
               );
-              form.setFieldValue("sendChannel", sendChannel);
-              form.setFieldValue("accountId", record.sendAccountId);
+              newTemplateForm.setFieldValue("sendChannel", sendChannel);
+              newTemplateForm.setFieldValue("accountId", record.sendAccountId);
               let configs = JSON.parse(record.msgContent);
               for (const key in configs) {
-                form.setFieldValue(["config", key], configs[key]);
+                newTemplateForm.setFieldValue(["config", key], configs[key]);
               }
               setModalOpen(true);
             }}
@@ -154,7 +389,7 @@ function Page() {
       );
       if (response?.status == respStatusEnum.SUCCESS) {
         mutateMessageTemplate();
-        form.resetFields();
+        newTemplateForm.resetFields();
         setModalOpen(false);
         toast.success(response.msg);
       } else {
@@ -165,37 +400,43 @@ function Page() {
       console.log(e);
     }
   };
+  const [floatButtonOpen, setFloatButtonOpen] = useState(false);
   return (
     <>
       <Toaster></Toaster>
-      <div className="flex flex-col gap-3">
-        <div>
+      <div className="flex gap-3 justify-evenly">
+        <Card title="Templates" className="flex-1">
           <Button
-            className=""
-            type={"primary"}
+            className="mb-3"
+            type="primary"
             onClick={() => setModalOpen(true)}
           >
             New
           </Button>
-        </div>
-        <Table
-          dataSource={messageTemplateData}
-          columns={tableColumns}
-          bordered
-        ></Table>
+          <Table
+            pagination={{ pageSize: 5 }}
+            dataSource={messageTemplateData}
+            columns={tableColumns}
+            bordered
+            loading={isLoading}
+          ></Table>
+        </Card>
+        <Card title="Accounts" className="flex-1">
+          <AccountPage></AccountPage>
+        </Card>
       </div>
       <Modal
         destroyOnClose={true}
         open={modalOpen}
         onCancel={() => {
           setModalOpen(false);
-          form.resetFields();
+          newTemplateForm.resetFields();
         }}
         onOk={() => {
-          form.submit();
+          newTemplateForm.submit();
         }}
       >
-        <Form form={form} onFinish={onFinishSuccess} className="px-5 py-5">
+        <Form form={newTemplateForm} onFinish={onFinishSuccess} className="p-5">
           <Form.Item name="id" label="id" style={{ display: "none" }}>
             <Input></Input>
           </Form.Item>
@@ -242,8 +483,8 @@ function Page() {
             >
               <Select
                 options={
-                  accountsData &&
-                  accountsData
+                  channelAccounts &&
+                  channelAccounts
                     .filter(
                       (key) =>
                         key.sendChannel ==
@@ -280,6 +521,7 @@ function Page() {
       >
         <Form
           form={testForm}
+          className="p-5"
           onFinish={async (value: {
             receiver: string;
             configs: Record<string, string>;

@@ -41,12 +41,6 @@ export default function RootLayout({
                       </Link>
                       <Link
                         className="px-2 py-1 text-sm rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900 "
-                        href={"/dashboard/account"}
-                      >
-                        Account
-                      </Link>
-                      <Link
-                        className="px-2 py-1 text-sm rounded-lg text-slate-700 hover:bg-slate-100 hover:text-slate-900 "
                         href={"/dashboard/trace"}
                       >
                         History
