@@ -27,7 +27,7 @@ export default function RootLayout({
           <SessionProvider refetchInterval={3600} refetchOnWindowFocus>
             <SWRConfig>
               <Provider store={store}>
-                <div className="w-screen min-h-screen">
+                <div className="flex flex-col w-screen h-screen min-h-screen">
                   <div className="flex items-center justify-between h-20 gap-6 border-b">
                     <div className="flex items-center px-3 lg:gap-9">
                       <p className="block text-2xl font-semibold text-blue-600 font-comfortta">
