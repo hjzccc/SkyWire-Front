@@ -83,9 +83,7 @@ export const useTraceInfo = (access_token?: string) => {
     "/api/trace",
     access_token,
     {},
-    {
-      dedupingInterval: 20 * 1000,
-    }
+    {}
   );
   const dataRecords: TraceRecord[] | undefined = data?.data?.map((record) =>
     JSON.parse(record)
